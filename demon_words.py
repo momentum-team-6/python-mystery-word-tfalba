@@ -1,8 +1,7 @@
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-not_guessed = []
+
 guessed = []
-rounds_remaining = 8
 import curses, sys 
 
 # Setup: capture control sequence 
@@ -12,80 +11,62 @@ clear = str(curses.tigetstr('clear'), 'ascii')
 words = open('words.txt', 'r').read().lower()
 import random
 words = words.split()
+input_words = []
 subset_words = []
-set_word_length = 4
-#guessed = ['a', 'b', 'c']
+set_word_length = int(input('Choose number of letters in word: '))
+
+# new list with only words with set_word_length letters and removing dups
+[subset_words.append(word) for word in words if len(word) == set_word_length and word not in subset_words]
+
+# this code removes any word with multiple occurences of a letter and saves it in new list input_words
+# it is ugly but it works
+for word in subset_words:
+  for letter in word:
+    if word.count(letter) > 1:
+      word = word.replace(letter, '?')
+  # [word.replace(letter, '?') for letter in word if word.count(letter) > 1]
+  # why doesn't the above work?
+  input_words.append(word)
+new_input_words = []
+#[input_words.remove(word) for word in input_words if '?' in word]
+# why doesn't the above work??
+[new_input_words.append(word) for word in input_words if '?' not in word]
+input_words = new_input_words
+
+## call subset_words output_words instead
+## add set split to choose max over position of letter 
+## for instance if a is selected, compare all a in first position, all a in secon
+## and so on... see if the max of those sets is greater than alt set
+
 guess=''
-position = []
-subber_words= []
-for word in words:
-  if len(word) == set_word_length:
-    subset_words.append(word)
-#print(subset_words)
-counter=0
-in_sub = False
-true_count = 0
 while len(guessed) < 25:
 
-  #guessed.append(guess)
-  # for x in subset_words:
-  #   for guesses in guessed:
-  #     if guesses in x:
-  #      #print('hello', word)
-  #       subset_words.remove(x)
-
-  #print('before entered letter', subset_words)
-  new_subset_words = []
-  new_subset_words_alt = []
-  guess = input('enter a guess')
-  for sub in subset_words:
+  alt_sub_input_words = []
+  guess = input('enter a guess: ')
+  #create empty list of lists for each possible position
+  sub_input_words=[ [] for i in range(set_word_length)]
+  for sub in input_words:
     if guess in sub:
-      new_subset_words.append(sub)
+      [sub_input_words[i].append(sub) for i in range(set_word_length) if guess == sub[i]]
     else:
-      new_subset_words_alt.append(sub)
-  if len(new_subset_words)>len(new_subset_words_alt):
-    subset_words = new_subset_words
-    print(f'{guess} is in word')
-    position.append(guess)
-    in_sub = True
-    
-    
-    for subber in subset_words:
-      if guess in subber[true_count]:
-        print('I am HERE', subber)
-        subber_words.append(subber)
-        #subber_words.append(subber)
-      #else:
-        
-    print(subber_words)
-    true_count +=1
-
-  else:
-    subset_words = new_subset_words_alt
+      alt_sub_input_words.append(sub)
+  max_length = max([len(sub_input_words[i]) for i in range(set_word_length)])
+  if len(alt_sub_input_words)>max_length:
+    input_words = alt_sub_input_words
     print(f'{guess} is not in word')
-  #guessed.append(guess)
-  if in_sub == True:
-    subset_words = subber_words
-    subber_words = []
-  print('after entered letter', subset_words)
+  else:
+    input_words = max(sub_input_words, key=len)
+    #here is where I want to set a position identifier -- need to mark it when generate set_input_words[i]
+    #think of possibility of using classes after reading more from notebook
+    print(f'{guess} is in word')
 
-  counter += 1
-  in_sub = False
-  print(counter)
-  print(in_sub)
-  print(true_count)
-  #print('removing e words', new_subset_words)
+  guessed.append(guess)
+  #saving guesses for later and for tracking while loop
+  print(sub_input_words)
+  print([len(sub_input_words[i]) for i in range(set_word_length)])
+  print(max_length)
+  print('after entered letter', input_words)
 
-# Next step is to fix the position of guess when "it is in word". start with fixing it to first position available
-
-# candidates =[[],[],[],[]]
-
-# for word in subset_words:
-#   for spot in range(len(word)):
-#     if guess == list(word)[spot]:
-#       print(candidates[spot])
-#       candidates[spot].append(word)
-# print(len(candidates[0]), len(candidates[1]), len(candidates[2]))
 
 
 # def new_round():
