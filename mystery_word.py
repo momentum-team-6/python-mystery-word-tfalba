@@ -1,8 +1,12 @@
-alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 not_guessed = []
 guessed = []
 rounds_remaining = 8
+import curses, sys 
+
+curses.setupterm() 
+clear = str(curses.tigetstr('clear'), 'ascii') 
 
 def new_round():
   game_mode = input("Please enter '1' for easy mode, '2' for normal mode, or '3' for hard mode: ")
@@ -32,42 +36,43 @@ def check_word(word_option, game_mode):
     else:
       get_word(game_mode)
 
-def clear_display(list_not_guessed, list_guessed, last_guess, word_letters):
+def show_display(list_not_guessed, list_guessed, last_guess, word_letters):
   new_display = word_letters
 
   for i in range(len(list_not_guessed)):
     new_display = [letter.replace(list_not_guessed[i], '_') for letter in new_display]
-  print(new_display)
+  disp = ' '.join(new_display)
+  print(disp)
 
 def start_play(iter, word_letters, word):
+  #sys.stdout.write(clear)
   print(f'You have {iter} rounds remaining')
-  clear_display(not_guessed, guessed, '', word_letters)
+  if iter == 8:
+    show_display(not_guessed, guessed, '', word_letters)
   if iter >0:
     new_guess = input('Enter a new letter: ')
-    if len(new_guess) != 1 or new_guess.capitalize() not in alphabet:
+    new_guess = new_guess.capitalize()
+    if len(new_guess) != 1 or new_guess not in alphabet:
       print('Invalid response, please enter a new letter')
       start_play(iter, word_letters, word)
     else:
-      new_guess = new_guess.capitalize()
       if new_guess in not_guessed and new_guess not in guessed:
         not_guessed.remove(new_guess)
-        clear_display(not_guessed, guessed, new_guess, word_letters)
+        show_display(not_guessed, guessed, new_guess, word_letters)
         if len(not_guessed) == 0:
           print(f'You win! The word is {word}! Play again?  ')
           play_again()
         else:
-          print('You found a letter!')
-          #print(f'You have {iter} rounds remaining')
-          #print(guessed)
           guessed.append(new_guess)
           start_play(iter, word_letters, word)
+          print('You found a letter!')
       elif new_guess in guessed:
         print('You already guessed that letter')
         start_play(iter, word_letters, word)
       else:
         print('Sorry- that letter is not present')
+        show_display(not_guessed, guessed, new_guess, word_letters)
         iter = iter - 1
-        #print(f'You have {iter} rounds remaining')
         guessed.append(new_guess)
         start_play(iter, word_letters, word)
   else:
@@ -87,8 +92,10 @@ def start_round(word):
   start_play(rounds_remaining, word_letters, word)
 
 def play_again():
+  
   keep_going = input("Enter 'y' to play again or 'n' to quit.  ")
   if keep_going == 'y':
+    sys.stdout.write(clear)
     new_round()
   else:
     print('Thanks for playing mystery word!')
