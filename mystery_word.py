@@ -1,122 +1,111 @@
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
-not_guessed = []
-guessed = []
-rounds_remaining = 8
+import random
 import curses, sys 
-
 curses.setupterm() 
 clear = str(curses.tigetstr('clear'), 'ascii') 
 
-def new_round(guessed):
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                     new_round sets off game and calls start_play                                     #
+# -------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+#             start_play toggles back and forth to show_display unless game ending when call to play_again             #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+def new_round():                           #Sets up new round -- initialize play-level, select word, and set inital values and top display
   game_mode = input("Please enter '1' for easy mode, '2' for normal mode, or '3' for hard mode: ")
-  get_word(game_mode)
-
-def get_word(game_mode):
   words = open('words.txt', 'r').read()
-  import random
   words = words.split()
-  word = random.choice(words)
-  check_word(word, game_mode)
 
-def check_word(word_option, game_mode):
-  if game_mode == '1':
-    if len(word_option) <7 and len(word_option)>3:
-      start_round(word_option)
-    else:
-      get_word(game_mode)
+  if game_mode == '1':                                                            #Define word set based on play-level selected
+    play_words = [word for word in words if len(word) <7 and len(word) >3]
   elif game_mode == '2':
-    if len(word_option) <9 and len(word_option)>5:
-      start_round(word_option)
-    else:
-      get_word(game_mode)
+    play_words = [word for word in words if len(word) <9 and len(word) >5]
+  elif game_mode == '3':
+    play_words = [word for word in words if len(word) >7]
   else:
-    if len(word_option) > 7:
-      start_round(word_option)
-    else:
-      get_word(game_mode)
+    print('Invalid selection. Please select again.')
+    new_round()
 
-def show_display(list_not_guessed, list_guessed, last_guess, word_letters):
-  new_display = word_letters
+  play_word = random.choice(play_words)                     #choose random word, set initial values including not_guessed as unique letters appearing
+  word = play_word.upper()
+  word_letters = list(word)
+  guessed = []
+  not_guessed = []
+  rounds_remaining = 8
+  [not_guessed.append(letter) for letter in word_letters if letter not in not_guessed]
 
-  for i in range(len(list_not_guessed)):
-    new_display = [letter.replace(list_not_guessed[i], '_') for letter in new_display]
-  disp = ' '.join(new_display)
-  
-  print('')
-  print(disp)
-  print('')
+  print(f'The word contains {len(word)} letters.')          #Top display
+  print('_ '*len(word))
 
-def start_play(iter, word_letters, word, list_guessed):
-  #sys.stdout.write(clear)
-  print(f'You have {iter} rounds remaining')
-  # if iter == 8:
-  #   show_display(not_guessed, guessed, '', word_letters)
-  if iter >0:
-    list_guessed.sort()
-    print(list_guessed)
+  start_play(rounds_remaining, word_letters, word, guessed, not_guessed)      #Begin play
+
+def start_play(iter, word_letters, word, guessed, not_guessed):     #Collects input letter, validates, and checks result // updating display and prompting and moving to next letter or ending game
+  if iter >0:                                            #When rounds still remain
+    guessed.sort()
+    print(f'Guessed letters: {guessed}')
     print('')
     new_guess = input('Enter a new letter: ')
-    new_guess = new_guess.capitalize()
+    new_guess = new_guess.upper()
     
-    if len(new_guess) != 1 or new_guess not in alphabet:
+    if len(new_guess) != 1 or new_guess not in alphabet:      #Invalid entry return to start
       print('Invalid response, please enter a new letter.')
-      start_play(iter, word_letters, word, guessed)
-    else:
-      if new_guess in not_guessed and new_guess not in guessed:
+      start_play(iter, word_letters, word, guessed, not_guessed)
+    else:                                                         #Is valid entry - 3 options
+      if new_guess in not_guessed and new_guess not in guessed:   #opt1 -- newly revealed letter -- show_display & check cases a & b
         not_guessed.remove(new_guess)
-        show_display(not_guessed, guessed, new_guess, word_letters)
-        if len(not_guessed) == 0:
+        show_display(iter, word_letters, word, new_guess, guessed, not_guessed)
+        if len(not_guessed) == 0:                                                   #case_a -- round is won -- play again option
+          print('')
           print(f'You win! The word is {word}! Play again?')
           play_again()
-        else:
+        else:                                                                       #case_b -- restart and append guess
           guessed.append(new_guess)
-          start_play(iter, word_letters, word, guessed)
-          #print('You found a letter!')
-      elif new_guess in guessed:
+          print('You found a letter!')
+          start_play(iter, word_letters, word, guessed, not_guessed)
+      elif new_guess in guessed:                                  #opt2 -- previously guessed letter (in word or not), start_play
+        print('')
         print('You already guessed that letter')
-        start_play(iter, word_letters, word, guessed)
-      else:
+        print('')
+        start_play(iter, word_letters, word, guessed, not_guessed)
+      else:                                                       #opt3 -- new guess that is not in word // show_display, append, and start_play
+        print('')
         print('Sorry - that letter is not present.')
-        show_display(not_guessed, guessed, new_guess, word_letters)
+        show_display(iter, word_letters, word, new_guess, guessed, not_guessed)     #could test not re-showing display here
         iter -= 1
         guessed.append(new_guess)
-        start_play(iter, word_letters, word, guessed)
-  else:
+        start_play(iter, word_letters, word, guessed, not_guessed)
+  else:                                                     #No rounds remaining
+    print('')
     print(f'Sorry - you are out of guesses! The word is {word} Play again?')
     play_again()
   return
 
-def start_round(word):
-  list_guessed= []
-  word = word.upper()
-  word_letters = []
-  word_letters = list(word)
-  #how to turn the following into a comprehension?
-  for letter in word_letters:
-    if letter not in not_guessed:
-      not_guessed.append(letter)
-  print(f'The word contains {len(word)} letters.')
-  start_play(rounds_remaining, word_letters, word, list_guessed)
+def show_display(iter, word_letters, word, last_guess, guessed, not_guessed):   #Shows display and updates appropriately based on guessed letters
+  new_display = word_letters
 
-def play_again():
-  
+  for i in range(len(not_guessed)):
+    new_display = [letter.replace(not_guessed[i], '_') for letter in new_display]
+  disp = ' '.join(new_display)
+
+  print('')
+  print(f'You have {iter} rounds remaining')
+  print('')
+  print(disp)
+  print('')
+
+def play_again():                            #Provides option to restart game and resets if y
+  print('')
   keep_going = input("Enter 'y' to play again or 'n' to quit.  ")
   if keep_going == 'y':
     sys.stdout.write(clear)
-    new_round([])
+    new_round()
   else:
+    print('')
     print('Thanks for playing mystery word!')
+    return
 
-new_round([])
+new_round()                                   #Initial call of function to play
 
-# Add a list that keeps track of guessed letters and notifies if used again DONE
-# track what is happening when the letter that is already up doesn't show up in 
-# not_guessed HANDLED BY CHECKING GUESSED
-# figure out how to pull a random word from the text file DONE
-# figure out how to choose a word of a specified length randomly DONE
-# what is devil mode? - STILL NEEDED
-# make display more exciting!! - STILL NEEDED
-# handle error cases better -- ADDED ALPHABET & CHECK
-# add options to restart play if don't get word in 8 rounds or if win -DONE
+#Find out how to add a break line to a print statement
 
