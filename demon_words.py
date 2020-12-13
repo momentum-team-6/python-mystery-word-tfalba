@@ -10,7 +10,6 @@ alphabet_lower = alphabet.split()
 
 def play_demon_words():
   guessed = []
-
   counter = 0
   attempts = 24
   game_over = False
