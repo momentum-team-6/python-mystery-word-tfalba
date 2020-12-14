@@ -41,18 +41,26 @@ def new_round():                           #Sets up new round -- initialize play
   start_play(rounds_remaining, word_letters, word, guessed, not_guessed)      #Begin play
 
 def start_play(iter, word_letters, word, guessed, not_guessed):     #Collects input letter, validates, and checks result // updating display and prompting and moving to next letter or ending game
+
+# ------------------------------------------------ Game still in play ------------------------------------------------ #
+
   if iter >0:                                            #When rounds still remain
     guessed.sort()
     print(f'Guessed letters: {guessed}')
     print('')
     new_guess = input('Enter a new letter: ')
     new_guess = new_guess.upper()
-    
-    if len(new_guess) != 1 or new_guess not in alphabet:      #Invalid entry return to start
+
+# ------------------------------------------ Invalid entry - return to start ----------------------------------------- #
+
+    if len(new_guess) != 1 or new_guess not in alphabet:          #Invalid entry return to start
       print('Invalid response, please enter a new letter.')
       start_play(iter, word_letters, word, guessed, not_guessed)
-    else:                                                         #Is valid entry - 3 options
-      if new_guess in not_guessed and new_guess not in guessed:   #opt1 -- newly revealed letter -- show_display & check cases a & b
+
+# -------------------------------------------- Is valid entry - 3 options -------------------------------------------- #
+
+    else:                                                           
+      if new_guess in not_guessed and new_guess not in guessed:     #opt1 -- newly revealed letter -- show_display & check cases a & b
         not_guessed.remove(new_guess)
         show_display(iter, word_letters, word, new_guess, guessed, not_guessed)
         if len(not_guessed) == 0:                                                   #case_a -- round is won -- play again option
@@ -63,23 +71,27 @@ def start_play(iter, word_letters, word, guessed, not_guessed):     #Collects in
           guessed.append(new_guess)
           print('You found a letter!')
           start_play(iter, word_letters, word, guessed, not_guessed)
-      elif new_guess in guessed:                                  #opt2 -- previously guessed letter (in word or not), start_play
+      elif new_guess in guessed:                                    #opt2 -- previously guessed letter (in word or not), start_play
         print('')
         print('You already guessed that letter')
         print('')
         start_play(iter, word_letters, word, guessed, not_guessed)
-      else:                                                       #opt3 -- new guess that is not in word // show_display, append, and start_play
+      else:                                                         #opt3 -- new guess that is not in word // show_display, append, and start_play
         print('')
         print('Sorry - that letter is not present.')
-        show_display(iter, word_letters, word, new_guess, guessed, not_guessed)     #could test not re-showing display here
         iter -= 1
+        show_display(iter, word_letters, word, new_guess, guessed, not_guessed)     #could test not re-showing display here
         guessed.append(new_guess)
         start_play(iter, word_letters, word, guessed, not_guessed)
-  else:                                                     #No rounds remaining
+
+# --------------------------------------------- Game ends - replay option -------------------------------------------- #
+
+  else:                                                               #No rounds remaining
     print('')
     print(f'Sorry - you are out of guesses! The word is {word} Play again?')
     play_again()
   return
+
 
 def show_display(iter, word_letters, word, last_guess, guessed, not_guessed):   #Shows display and updates appropriately based on guessed letters
   new_display = word_letters
