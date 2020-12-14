@@ -16,11 +16,11 @@ s = [set() for i in range(word_length)]
 letter = 's'
 remaining_letters = alphabet_str.replace(letter, '')
 students = [remaining_letters]
-students = [letter, '*', 'a']
-appearance_count = 2        #loop over appearance_count from i to word_length -- find max of all including case with o
+students = [letter, '*']           # for all possible patterns should include letter up to length of word
+appearance_count = 3        #loop over appearance_count from i to word_length -- find max of all including case with o
 
-possible_pairings = [(s1, s2, s3, s4, s5, s6, ) for s1 in students for s2 in students for s3 in students for s4 in students for s5 in students for s6 in students]
-#possible_pairings = [(s1, s2, s3, s4) for s1 in students for s2 in students for s3 in students for s4 in students]
+possible_pairings = [(s1, s2, s3, s4, s5, s6) for s1 in students for s2 in students for s3 in students for s4 in students for s5 in students for s6 in students]
+#possible_pairings = [(s1, s2, s3, s4, s5) for s1 in students for s2 in students for s3 in students for s4 in students for s5 in students]
 
 pair_pattern = []
 for pair in possible_pairings:
@@ -29,7 +29,7 @@ for pair in possible_pairings:
     pair = ''.join(pair)
     #print(pair)
     pair_pattern.append(pair)
-#print(pair_pattern)
+print(pair_pattern)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                         Python3 program to print all the strings that match the given pattern                        #
@@ -57,7 +57,9 @@ def encodeString(Str):
     res += str(map[ch])                       # Append the number associate with current character into the output string 
   return res
 
-# Function to print all the strings that match the given pattern where every character in the pattern is uniquely mapped to a character in the dictionary 
+# -------------------------- Function to print all the strings that match the given pattern -------------------------- #
+# ------------- where every character in the pattern is uniquely mapped to a character in the dictionary ------------- #
+
 def find_matched_words(dict, pattern):
     # len is length of the pattern 
     Len = len(pattern)
@@ -69,9 +71,9 @@ def find_matched_words(dict, pattern):
         # If size of pattern is same as size of current dictionary word and both pattern and the word has same hash, append (or print) the word 
       if(len(word) == Len and
         encodeString(word) == hash):
-          print(hash, word, end = " ")
+          print(word, end = " ")
           counter += 1
-    #print(counter)
+    print(counter)
 
 working_list = []
 for word in words:
@@ -86,7 +88,7 @@ for i in range(len(pair_pattern)):
   #print(i, pair_pattern[i])
   #print('')
 
-# This code for findMatchedWords is contributed by avanitrachhadiya2155
+# This code for findMatchedWords adapted from avanitrachhadiya2155
 
 
 

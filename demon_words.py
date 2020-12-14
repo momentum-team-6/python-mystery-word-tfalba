@@ -9,6 +9,9 @@ alphabet = alphabet.lower()
 alphabet_lower = alphabet.split()
 
 def play_demon_words():
+
+# --------------------------------------- start play and set intial conditions --------------------------------------- #
+
   guessed = []
   counter = 0
   attempts = 24
@@ -24,7 +27,9 @@ def play_demon_words():
     else:
       set_word_length = int(set_word_length)
   set_word_length = int(set_word_length)
-  
+
+# ------------------------ Setting word list for word length and removing words with char dups ----------------------- #
+
   subset_words = []                                                                                                                    # new list with only words with set_word_length letters and removing dups
   [subset_words.append(word) for word in words if len(word) == set_word_length and word not in subset_words]    
   remove_words = []                                                                                                                   #identify list of words with repeated chars
@@ -35,7 +40,9 @@ def play_demon_words():
   display = '_ '*set_word_length
   display = display.split()
 
-  while len(guessed) < attempts and game_over == False:
+# -------------------------------------------------- Main game play -------------------------------------------------- #
+
+  while len(guessed) < attempts and game_over == False:                 #Running of game play
     guess = input('Enter a guess: ').lower()
     
     if guess not in alphabet_lower or len(guess)>1:                     #Handle invalid choices or repeat guess
@@ -67,6 +74,8 @@ def play_demon_words():
     guessed.append(guess)                                                     #add to list of guessed letters & increment game-play
     counter += 1
 
+# ------------------------------------------------ Printing of display ----------------------------------------------- #
+
     [print('\n' + f'{guess.upper()} is not in word' + '\n') if len(alt_sub_input_words)>max_length else print('\n' + f'{guess.upper()} is in word' + '\n') ]      #print display info (reformatting as well)
     print('Words Remaining: ' + str(len(input_words))+ '\n')                  
     
@@ -84,6 +93,9 @@ def play_demon_words():
       print('\n' + 'You win!!')
       game_over = True
       continue
+
+# ----------------------------------------------------- Game over ---------------------------------------------------- #
+
   [print('\n' + 'Thanks for playing!' + '\n') if game_over == True else print('\n' + 'You are out of guesses.' + '\n')]
   play_again = input('Play again? y/n: ')
   if play_again == 'y' or play_again == 'Y':
